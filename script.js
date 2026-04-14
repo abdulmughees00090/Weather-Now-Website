@@ -191,7 +191,7 @@ async function fetchAQI(lat,lon) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  WMO CODE → condition
+//  WMO CODE → condition with DAY/NIGHT awareness
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const WMO = {
   0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
@@ -204,7 +204,9 @@ const WMO = {
   85:'Slight snow showers',86:'Snow showers',
   95:'Thunderstorm',96:'Thunderstorm w/ hail',99:'Thunderstorm w/ heavy hail',
 };
-const WMO_ICON = {
+
+// Day icons
+const WMO_ICON_DAY = {
   0:'☀️',1:'🌤️',2:'⛅',3:'☁️',
   45:'🌫️',48:'🌫️',
   51:'🌦️',53:'🌧️',55:'🌧️',
@@ -214,6 +216,30 @@ const WMO_ICON = {
   85:'🌨️',86:'🌨️',
   95:'⛈️',96:'⛈️',99:'⛈️',
 };
+
+// Night icons (moon versions)
+const WMO_ICON_NIGHT = {
+  0:'🌙',1:'🌤️',2:'☁️',3:'☁️',
+  45:'🌫️',48:'🌫️',
+  51:'🌦️',53:'🌧️',55:'🌧️',
+  61:'🌦️',63:'🌧️',65:'⛈️',
+  71:'🌨️',73:'❄️',75:'❄️',77:'🌨️',
+  80:'🌦️',81:'🌧️',82:'⛈️',
+  85:'🌨️',86:'🌨️',
+  95:'⛈️',96:'⛈️',99:'⛈️',
+};
+
+function getWeatherIcon(code, sunriseISO, sunsetISO) {
+  const now = new Date();
+  const sunrise = new Date(sunriseISO);
+  const sunset = new Date(sunsetISO);
+  const isNight = now < sunrise || now > sunset;
+  
+  if (isNight && WMO_ICON_NIGHT[code]) {
+    return WMO_ICON_NIGHT[code];
+  }
+  return WMO_ICON_DAY[code] || '🌡️';
+}
 
 function wmoToSkyCondition(code) {
   if ([0,1].includes(code)) return 'clear';
@@ -536,7 +562,11 @@ function render(w, aqiData) {
   document.getElementById('hero-temp').textContent = toUnit(temp);
   document.getElementById('hero-unit').textContent = unitLabel();
   document.getElementById('hero-condition').textContent = WMO[code] || 'Unknown';
-  document.getElementById('hero-icon').textContent = WMO_ICON[code] || '🌡️';
+  
+  // FIXED: Use day/night aware icon function
+  const weatherIcon = getWeatherIcon(code, daily.sunrise[0], daily.sunset[0]);
+  document.getElementById('hero-icon').textContent = weatherIcon;
+  
   document.getElementById('loc-name').textContent = STATE.locationName;
   document.getElementById('feels-like').textContent = `${toUnit(curr.apparent_temperature)}${unitLabel()}`;
   document.getElementById('humidity').textContent = `${curr.relative_humidity_2m}%`;
@@ -600,9 +630,11 @@ function render(w, aqiData) {
     const barW = range > 0 ? Math.min(100, thiRange/range*100) : 50;
     const el = document.createElement('div');
     el.className = 'forecast-day';
+    // Use day icons for forecast (forecast shows day conditions)
+    const forecastIcon = WMO_ICON_DAY[dcode] || '🌡️';
     el.innerHTML = `
       <div class="forecast-day-name">${i===0?'Today':days[d.getDay()]}</div>
-      <div class="forecast-day-icon">${WMO_ICON[dcode]||'🌡️'}</div>
+      <div class="forecast-day-icon">${forecastIcon}</div>
       <div class="forecast-day-high">${hi}${unitLabel()}</div>
       <div class="forecast-day-low">${lo}${unitLabel()}</div>
       <div class="forecast-day-bar"><div class="forecast-day-bar-fill" style="width:${barW}%"></div></div>
