@@ -318,18 +318,19 @@ header {
   font-weight: 600;
 }
 
-/* Weather icon on hero */
+/* Weather icon on hero - visible on all devices */
 .hero-weather-icon {
   position: absolute;
   right: 40px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 7rem;
-  opacity: 0.15;
+  opacity: 0.25;
   pointer-events: none;
   filter: blur(1px);
   animation: float 6s ease-in-out infinite;
 }
+
 @keyframes float {
   0%,100% { transform: translateY(-50%) translateX(0); }
   50% { transform: translateY(-52%) translateX(6px); }
@@ -892,11 +893,18 @@ header {
   .aqi-metrics { grid-template-columns: repeat(2,1fr); }
   .outdoor-score-wrap { flex-direction: column; }
 }
+
 @media (max-width: 600px) {
   #app { padding: 0 16px 60px; }
   #hero-main { padding: 24px 20px; }
   #hero-temp { font-size: 5rem; }
-  .hero-weather-icon { display: none; }
+  /* FIXED: Make weather icon visible on mobile, just smaller */
+  .hero-weather-icon {
+    font-size: 3.5rem;
+    right: 20px;
+    opacity: 0.2;
+    filter: blur(0.5px);
+  }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
   #forecast-grid { grid-template-columns: repeat(4,1fr); font-size: 0.8em; }
   #scrubber-display { grid-template-columns: repeat(3,1fr); }
