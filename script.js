@@ -353,24 +353,24 @@ function spawnSnow(count = 65) {
 //  LIFESTYLE ICON SYSTEM — SVG-based refined icons
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const LIFESTYLE_ICONS = {
-  clothing: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  clothing: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="https://www.w3.org/2000/svg">
     <path d="M10 4H18L22 9L18 11V24H10V11L6 9L10 4Z" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" fill="${color}22"/>
     <path d="M10 4C10 4 12 7 14 7C16 7 18 4 18 4" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/>
   </svg>`,
 
-  hydration: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  hydration: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="https://www.w3.org/2000/svg">
     <path d="M14 4C14 4 7 13 7 17.5C7 21.09 10.13 24 14 24C17.87 24 21 21.09 21 17.5C21 13 14 4 14 4Z" stroke="${color}" stroke-width="1.8" fill="${color}22"/>
     <path d="M11 19.5C11 19.5 11 22 14 22" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/>
   </svg>`,
 
-  breathing: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  breathing: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="https://www.w3.org/2000/svg">
     <ellipse cx="11" cy="14" rx="4" ry="7" stroke="${color}" stroke-width="1.8" fill="${color}22"/>
     <ellipse cx="17" cy="14" rx="4" ry="7" stroke="${color}" stroke-width="1.8" fill="${color}22"/>
     <path d="M11 14H17" stroke="${color}" stroke-width="1.8"/>
     <path d="M14 7V4M14 24V21" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/>
   </svg>`,
 
-  besttime: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  besttime: (color) => `<svg viewBox="0 0 28 28" fill="none" xmlns="https://www.w3.org/2000/svg">
     <circle cx="14" cy="14" r="9" stroke="${color}" stroke-width="1.8" fill="${color}22"/>
     <path d="M14 9V14L17.5 16.5" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M6 14H4M24 14H22M14 4V6M14 22V24" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/>
