@@ -1,2 +1,16 @@
-User-agent: *\nDisallow: \nCrawl-delay: 10
-Sitemap: https://weathernow.silverfoxdynamics.com.com/sitemap.xml
+User-agent: *
+Allow: /
+Crawl-delay: 2
+Sitemap: https://weathernow.silverfoxdynamics.com/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Disallow nothing - all content is public
