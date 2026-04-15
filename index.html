@@ -10,8 +10,7 @@
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <!-- Modern sans-serif font (Inter) as requested, fallback to system fonts for clean readability -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="style.css">
@@ -124,12 +123,25 @@
           <div class="sun-card-title">Sun Path</div>
           <div class="sun-arc">
             <svg id="sun-arc-svg" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M 10 75 Q 100 5 190 75" stroke="rgba(255,159,67,0.3)" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>
-              <circle id="sun-pos" cx="10" cy="75" r="6" fill="#ff9f43" filter="url(#glow)"/>
+              <!-- Arc path — brighter track -->
+              <path d="M 10 75 Q 100 5 190 75" stroke="rgba(255,200,60,0.25)" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>
+              <!-- Sun orb — larger, vivid -->
+              <circle id="sun-pos" cx="10" cy="75" r="9" fill="#ffd740" filter="url(#sunGlow)"/>
               <defs>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                <filter id="sunGlow" x="-100%" y="-100%" width="300%" height="300%">
+                  <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <filter id="moonGlow" x="-100%" y="-100%" width="300%" height="300%">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
                 </filter>
               </defs>
             </svg>
@@ -191,32 +203,30 @@
         <span class="wind-speed-val" id="wind-speed">— km/h</span>
         <span class="wind-dir-text" id="wind-dir-text">—</span>
       </div>
-
-      <div class="card" style="padding:24px;display:flex;flex-direction:column;gap:16px;">
-        <div class="insight-label">Air Quality</div>
-        <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap">
-          <div class="radial-wrap">
-            <svg class="radial-svg" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.08)" stroke-width="8" fill="none"/>
-              <circle id="aqi-arc" cx="50" cy="50" r="40" stroke="#5de4ff" stroke-width="8" fill="none"
-                stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
-                transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 1.5s cubic-bezier(.23,1,.32,1)"/>
-              <text id="aqi-val" class="radial-val" x="50" y="48" fill="white" font-family="'Inter',sans-serif" font-weight="700" font-size="18">—</text>
-              <text class="radial-unit" x="50" y="62" fill="rgba(232,237,245,0.55)" font-family="'DM Mono',monospace" font-size="8">AQI</text>
-            </svg>
-            <span class="radial-sub" id="aqi-cat">—</span>
-          </div>
-          <div class="radial-wrap">
-            <svg class="radial-svg" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.08)" stroke-width="8" fill="none"/>
-              <circle id="uv-arc" cx="50" cy="50" r="40" stroke="#ff9f43" stroke-width="8" fill="none"
-                stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
-                transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 1.5s cubic-bezier(.23,1,.32,1)"/>
-              <text id="uv-arc-val" class="radial-val" x="50" y="48" fill="white" font-family="'Inter',sans-serif" font-weight="700" font-size="18">—</text>
-              <text class="radial-unit" x="50" y="62" fill="rgba(232,237,245,0.55)" font-family="'DM Mono',monospace" font-size="8">UV IDX</text>
-            </svg>
-            <span class="radial-sub" id="uv-cat">—</span>
-          </div>
+      <div class="card" style="padding:24px;display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap">
+        <div class="radial-wrap">
+          <div class="radial-label">UV Index</div>
+          <svg class="radial-svg" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" stroke="rgba(255,255,255,0.07)" stroke-width="7" fill="none"/>
+            <circle id="uv-arc" cx="40" cy="40" r="32" stroke="var(--accent2)" stroke-width="7" fill="none"
+              stroke-dasharray="201.06" stroke-dashoffset="201.06" stroke-linecap="round"
+              transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1.8s cubic-bezier(.23,1,.32,1)"/>
+            <text id="uv-arc-val" x="40" y="37" class="radial-val">—</text>
+            <text id="uv-cat" x="40" y="51" class="radial-unit">—</text>
+          </svg>
+          <div class="radial-sub" id="uv-level">—</div>
+        </div>
+        <div class="radial-wrap">
+          <div class="radial-label">AQI</div>
+          <svg class="radial-svg" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" stroke="rgba(255,255,255,0.07)" stroke-width="7" fill="none"/>
+            <circle id="aqi-arc" cx="40" cy="40" r="32" stroke="var(--accent)" stroke-width="7" fill="none"
+              stroke-dasharray="201.06" stroke-dashoffset="201.06" stroke-linecap="round"
+              transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1.8s cubic-bezier(.23,1,.32,1)"/>
+            <text id="aqi-val" x="40" y="37" class="radial-val">—</text>
+            <text id="aqi-cat" x="40" y="51" class="radial-unit">—</text>
+          </svg>
+          <div class="radial-sub" id="aqi-level">—</div>
         </div>
       </div>
     </div>
@@ -321,7 +331,7 @@
         <div class="outdoor-score-circle">
           <svg viewBox="0 0 120 120">
             <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.07)" stroke-width="10" fill="none"/>
-            <circle id="oss-arc" cx="60" cy="60" r="50" stroke="#5de4ff" stroke-width="10" fill="none"
+            <circle id="oss-arc" cx="60" cy="60" r="50" stroke="#38d9ff" stroke-width="10" fill="none"
               stroke-dasharray="314.16" stroke-dashoffset="314.16" stroke-linecap="round"
               transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1.8s cubic-bezier(.23,1,.32,1)"/>
           </svg>
@@ -342,26 +352,26 @@
     <div id="lifestyle-section" class="anim-in delay-5">
       <div class="section-title" style="padding:0 0 16px">Lifestyle Insights</div>
       <div class="lifestyle-grid">
-        <div class="lifestyle-card card">
-          <div class="lifestyle-icon">👕</div>
+        <div class="lifestyle-card card" style="--lifestyle-accent: #38d9ff">
+          <div class="lifestyle-icon" id="clothing-icon">👕</div>
           <div class="lifestyle-card-title">Clothing Suggestion</div>
           <div class="lifestyle-card-desc" id="clothing-text">—</div>
           <div class="lifestyle-score-bar"><div class="lifestyle-score-fill" id="clothing-bar" style="width:0%;background:var(--accent)"></div></div>
         </div>
-        <div class="lifestyle-card card">
-          <div class="lifestyle-icon">💧</div>
+        <div class="lifestyle-card card" style="--lifestyle-accent: #5de4ff">
+          <div class="lifestyle-icon" id="hydration-icon">💧</div>
           <div class="lifestyle-card-title">Hydration Reminder</div>
           <div class="lifestyle-card-desc" id="hydration-text">—</div>
           <div class="lifestyle-score-bar"><div class="lifestyle-score-fill" id="hydration-bar" style="width:0%;background:#5de4ff"></div></div>
         </div>
-        <div class="lifestyle-card card">
-          <div class="lifestyle-icon">🫁</div>
+        <div class="lifestyle-card card" style="--lifestyle-accent: #7ecbff">
+          <div class="lifestyle-icon" id="breathing-icon">🫁</div>
           <div class="lifestyle-card-title">Breathing Comfort</div>
           <div class="lifestyle-card-desc" id="breathing-text">—</div>
           <div class="lifestyle-score-bar"><div class="lifestyle-score-fill" id="breathing-bar" style="width:0%;background:#7ecbff"></div></div>
         </div>
-        <div class="lifestyle-card card">
-          <div class="lifestyle-icon">⏰</div>
+        <div class="lifestyle-card card" style="--lifestyle-accent: #ffb347">
+          <div class="lifestyle-icon" id="besttime-icon">⏰</div>
           <div class="lifestyle-card-title">Best Time Outside</div>
           <div class="lifestyle-card-desc" id="besttime-text">—</div>
           <div class="lifestyle-score-bar"><div class="lifestyle-score-fill" id="besttime-bar" style="width:0%;background:var(--accent2)"></div></div>
