@@ -1,1 +1,2 @@
 User-agent: *\nDisallow: \nCrawl-delay: 10
+Sitemap: https://weathernow.silverfoxdynamics.com.com/sitemap.xml
