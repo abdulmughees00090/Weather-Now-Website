@@ -10,7 +10,11 @@
   "background_color": "#3367d6",
   "dir": "auto",
   "lang": "en",
-  "categories": ["weather", "lifestyle", "utilities"],
+  "categories": [
+    "weather",
+    "lifestyle",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "/icons/launchericon-72x72.png",
@@ -65,6 +69,6 @@
         }
       ]
     }
-  ]
+  ],
   "id": "WeatherNow"
 }
