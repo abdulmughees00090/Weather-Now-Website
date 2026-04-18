@@ -103,20 +103,6 @@
   }
   </script>
 </head>
-  <!-- Register Service Worker -->
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js')
-      .then(function(registration) {
-        console.log('Service Worker registered successfully:', registration.scope);
-      })
-      .catch(function(error) {
-        console.log('Service Worker registration failed:', error);
-      });
-  });
-}
-</script>
 <body>
 
 <!-- AMP Auto Ads -->
@@ -171,6 +157,11 @@ if ('serviceWorker' in navigator) {
           <path d="M21 3v5h-5"/>
           <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
           <path d="M3 21v-5h5"/>
+        </svg>
+      </div>
+      <div class="btn-icon" id="installPWA-btn" title="One Tap Weather Forecast" aria-label="Install Weather Now App" style="display:none;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 5v14m-7-7h14"/>
         </svg>
       </div>
     </div>
@@ -523,6 +514,67 @@ if ('serviceWorker' in navigator) {
 
 <!-- Main JavaScript -->
 <script src="script.js"></script>
+
+<!-- Register Service Worker & PWA Install Prompt -->
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(registration) {
+        console.log('Service Worker registered successfully:', registration.scope);
+      })
+      .catch(function(error) {
+        console.log('Service Worker registration failed:', error);
+      });
+  });
+}
+
+// PWA Install Prompt - One Tap Weather Forecast
+let deferredPrompt;
+const installBtn = document.getElementById('installPWA-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome 67+ from auto-showing prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+  // Show the install button
+  if (installBtn) {
+    installBtn.style.display = 'flex';
+    installBtn.title = 'One Tap Weather Forecast';
+  }
+  console.log('Install prompt event fired');
+});
+
+// Handle install button click
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+      console.log('No deferred prompt available');
+      return;
+    }
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for user's choice
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to install prompt: ${outcome}`);
+    // Reset the deferred prompt variable (can only be used once)
+    deferredPrompt = null;
+    // Hide the install button after user responds
+    installBtn.style.display = 'none';
+  });
+}
+
+// Optional: Listen for successful installation
+window.addEventListener('appinstalled', () => {
+  console.log('PWA was installed successfully');
+  deferredPrompt = null;
+  if (installBtn) {
+    installBtn.style.display = 'none';
+  }
+});
+</script>
 
 </body>
 </html>
