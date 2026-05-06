@@ -230,7 +230,7 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 #hourly-section .card { padding: 28px 32px; }
 .section-title { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
 .section-title::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
-#hourly-chart-wrap { position: relative; height: 160px; }
+#hourly-chart-wrap { position: relative; height: 180px; }
 
 /* ── SCRUBBER ── */
 #scrubber-section { margin-bottom: 24px; }
@@ -247,9 +247,12 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 /* ── 7-DAY FORECAST ── */
 #forecast-section { margin-bottom: 24px; }
 #forecast-section .card { padding: 28px 32px; }
-#forecast-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 10px; }
+#forecast-grid { display: grid; grid-template-columns: repeat(10,1fr); gap: 10px; }
 .forecast-day { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border-radius: var(--radius-sm); background: var(--glass); border: 1px solid transparent; transition: all var(--transition); cursor: default; }
 .forecast-day:hover { background: var(--glass-hover); border-color: var(--glass-border); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.forecast-wind { font-family: var(--font-mono); font-size: 0.56rem; color: var(--text-dim); text-align: center; line-height: 1.4; }
+.forecast-wind-unit { color: var(--text-dim); }
+.forecast-wind-dir { color: var(--accent); font-weight: 600; }
 .forecast-day-name { font-family: var(--font-mono); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); }
 .forecast-day-icon { font-size: 1.6rem; filter: drop-shadow(0 2px 8px rgba(255,255,255,0.15)); }
 .forecast-day-high { font-size: 0.95rem; font-weight: 700; }
@@ -371,7 +374,7 @@ header { display: flex; align-items: center; justify-content: space-between; pad
   #hero { grid-template-columns: 1fr; }
   #hero-side { flex-direction: row; flex-wrap: wrap; }
   #hero-side > * { flex: 1; min-width: 160px; }
-  #forecast-grid { grid-template-columns: repeat(4,1fr); }
+  #forecast-grid { grid-template-columns: repeat(5,1fr); }
   .grid-4 { grid-template-columns: repeat(2,1fr); }
   .aqi-metrics { grid-template-columns: repeat(2,1fr); }
   .outdoor-score-wrap { flex-direction: column; }
@@ -381,9 +384,19 @@ header { display: flex; align-items: center; justify-content: space-between; pad
   #app { padding: 0 16px 64px; }
   #hero-main { padding: 26px 22px; }
   #hero-temp { font-size: 5rem; }
-  .hero-weather-icon { display: none; }
+  /* Fix: show hero icon on mobile, repositioned below temp/condition */
+  .hero-weather-icon {
+    position: static;
+    transform: none;
+    animation: none;
+    font-size: 3.5rem;
+    opacity: 0.85;
+    display: block;
+    margin-top: 8px;
+    filter: drop-shadow(0 0 16px rgba(255,255,255,0.3));
+  }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
-  #forecast-grid { grid-template-columns: repeat(4,1fr); font-size: 0.8em; }
+  #forecast-grid { grid-template-columns: repeat(5,1fr); font-size: 0.75em; }
   #scrubber-display { grid-template-columns: repeat(3,1fr); }
   .lifestyle-grid { grid-template-columns: 1fr; }
   #hourly-section .card, #forecast-section .card,
