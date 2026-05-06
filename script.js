@@ -425,9 +425,9 @@ async function fetchWeather(lat, lon) {
     + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,`
     + `surface_pressure,wind_speed_10m,wind_direction_10m,cloud_cover,visibility,uv_index`
     + `&hourly=temperature_2m,precipitation_probability,wind_speed_10m,relative_humidity_2m,cloud_cover,`
-    + `dew_point_2m,uv_index`
-    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,uv_index_max`
-    + `&timezone=auto&forecast_days=7`;
+    + `dew_point_2m,uv_index,weather_code`
+    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,uv_index_max,wind_speed_10m_max,wind_direction_10m_dominant`
+    + `&timezone=auto&forecast_days=10`;
   const r = await fetch(url);
   return r.json();
 }
@@ -696,42 +696,74 @@ function buildHourlyChart(hourly) {
     return d.getHours() + ':00';
   });
   const temps = hourly.temperature_2m.slice(start, end).map(toUnit);
-  const precips = hourly.precipitation_probability.slice(start, end);
+  const weatherCodes = hourly.weather_code ? hourly.weather_code.slice(start, end) : [];
+  const sunriseISO = STATE.weather?.daily?.sunrise?.[0];
+  const sunsetISO = STATE.weather?.daily?.sunset?.[0];
 
   if (STATE.hourlyChart) { STATE.hourlyChart.destroy(); STATE.hourlyChart = null; }
 
   const chartCtx = document.getElementById('hourly-chart').getContext('2d');
+
+  // Weather icon plugin — draws emoji icons above each data point
+  const weatherIconPlugin = {
+    id: 'weatherIcons',
+    afterDatasetsDraw(chart) {
+      const { ctx, scales: { x, y } } = chart;
+      const meta = chart.getDatasetMeta(0);
+      ctx.save();
+      ctx.font = '13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      meta.data.forEach((point, idx) => {
+        const code = weatherCodes[idx];
+        if (code == null) return;
+        // Determine day/night for that hour
+        const hourTime = new Date(hourly.time[start + idx]);
+        const isNight = sunriseISO && sunsetISO
+          ? (hourTime < new Date(sunriseISO) || hourTime > new Date(sunsetISO))
+          : (hourTime.getHours() < 6 || hourTime.getHours() >= 20);
+        const icon = (isNight ? WMO_ICON_NIGHT[code] : WMO_ICON_DAY[code]) || '🌡️';
+        // Only draw every 3rd icon to avoid crowding
+        if (idx % 3 === 0) {
+          ctx.fillText(icon, point.x, point.y - 6);
+        }
+      });
+      ctx.restore();
+    }
+  };
+
   STATE.hourlyChart = new Chart(chartCtx, {
+    type: 'line',
     data: {
       labels,
       datasets: [
         {
-          type: 'line',
           label: 'Temp',
           data: temps,
           borderColor: 'rgba(56,217,255,0.85)',
-          backgroundColor: 'rgba(56,217,255,0.06)',
-          borderWidth: 2,
-          pointRadius: 3,
+          backgroundColor: (ctx) => {
+            const chart = ctx.chart;
+            const { ctx: canvasCtx, chartArea } = chart;
+            if (!chartArea) return 'rgba(56,217,255,0.06)';
+            const gradient = canvasCtx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(56,217,255,0.18)');
+            gradient.addColorStop(1, 'rgba(56,217,255,0.01)');
+            return gradient;
+          },
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
           pointBackgroundColor: 'rgba(56,217,255,0.9)',
-          tension: 0.4,
+          pointBorderColor: 'rgba(10,14,28,0.8)',
+          pointBorderWidth: 1.5,
+          tension: 0.45,
           fill: true,
-          yAxisID: 'y',
-        },
-        {
-          type: 'bar',
-          label: 'Precip',
-          data: precips,
-          backgroundColor: 'rgba(126,203,255,0.18)',
-          borderColor: 'rgba(126,203,255,0.3)',
-          borderWidth: 1,
-          borderRadius: 3,
-          yAxisID: 'y1',
         },
       ],
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 28 } },
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
@@ -742,9 +774,12 @@ function buildHourlyChart(hourly) {
           bodyFont:  { family: 'JetBrains Mono, DM Mono', size: 11 },
           padding: 10, cornerRadius: 10,
           callbacks: {
-            label: ctx => ctx.dataset.label === 'Temp'
-              ? ` ${ctx.parsed.y}${unitLabel()}`
-              : ` ${ctx.parsed.y}% precip`,
+            label: ctx => ` ${ctx.parsed.y}${unitLabel()}`,
+            afterLabel: (ctx) => {
+              const code = weatherCodes[ctx.dataIndex];
+              if (code == null) return '';
+              return ` ${WMO[code] || ''}`;
+            },
           },
         },
       },
@@ -758,13 +793,9 @@ function buildHourlyChart(hourly) {
           grid: { color: 'rgba(255,255,255,0.04)' },
           ticks: { color: 'rgba(220,230,255,0.4)', font: { family: 'JetBrains Mono, DM Mono', size: 10 }, callback: v => `${v}${unitLabel()}` },
         },
-        y1: {
-          position: 'right', min: 0, max: 100,
-          grid: { display: false },
-          ticks: { color: 'rgba(126,203,255,0.4)', font: { family: 'JetBrains Mono, DM Mono', size: 10 }, callback: v => `${v}%` },
-        },
       },
     },
+    plugins: [weatherIconPlugin],
   });
   return currentIdx;
 }
@@ -841,16 +872,23 @@ function render(w, aqiData) {
   sc.value = currentIdx;
   updateScrubber(currentIdx);
 
-  // 7-day forecast
+  // 10-day forecast
   const fg = document.getElementById('forecast-grid');
   fg.innerHTML = '';
+  // Update section title to reflect 10 days
+  const forecastTitle = document.querySelector('#forecast-section .section-title');
+  if (forecastTitle) forecastTitle.childNodes[0].textContent = '10-Day Forecast';
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  daily.time.slice(0, 7).forEach((dateStr, i) => {
+  const dayCount = Math.min(10, daily.time.length);
+  daily.time.slice(0, dayCount).forEach((dateStr, i) => {
     const d = new Date(dateStr);
     const hi = toUnit(daily.temperature_2m_max[i]);
     const lo = toUnit(daily.temperature_2m_min[i]);
     const dcode = daily.weather_code[i];
     const precip = daily.precipitation_probability_max[i] ?? 0;
+    const windSpd = Math.round(daily.wind_speed_10m_max?.[i] ?? 0);
+    const windDeg = daily.wind_direction_10m_dominant?.[i] ?? 0;
+    const windCardinal = degToCardinal(windDeg);
     const range = toUnit(daily.temperature_2m_max[0]) - toUnit(daily.temperature_2m_min[0]);
     const thiRange = hi - lo;
     const barW = range > 0 ? Math.min(100, thiRange / range * 100) : 50;
@@ -863,7 +901,8 @@ function render(w, aqiData) {
       <div class="forecast-day-high">${hi}${unitLabel()}</div>
       <div class="forecast-day-low">${lo}${unitLabel()}</div>
       <div class="forecast-day-bar"><div class="forecast-day-bar-fill" style="width:${barW}%"></div></div>
-      <div class="forecast-precip">${precip > 0 ? precip + '%' : ''}</div>
+      <div class="forecast-precip">${precip}%</div>
+      <div class="forecast-wind">${windSpd} <span class="forecast-wind-unit">km/h</span> <span class="forecast-wind-dir">${windCardinal}</span></div>
     `;
     fg.appendChild(el);
   });
